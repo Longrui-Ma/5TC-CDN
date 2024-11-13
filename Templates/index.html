@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Portfolio</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .gallery img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery img:hover {
+            transform: scale(1.05);
+        }
+
+        .full-image {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .full-image img {
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        .download {
+            color: white;
+            font-size: 18px;
+            margin-top: 10px;
+            text-decoration: none;
+            background-color: #555;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
+        .download:hover {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Portfolio</h1>
+    <div class="gallery">
+        {% for image in images %}
+            <img src="{{ url_for('portfolio_image', filename=image) }}" alt="Portfolio Image" onclick="showImage('{{ url_for('portfolio_image', filename=image) }}')">
+        {% endfor %}
+    </div>
+
+    <div class="full-image" id="fullImageContainer">
+        <span class="close" onclick="closeImage()">&#10005;</span>
+        <img id="fullImage" src="" alt="Full Size Image">
+        <a id="downloadLink" class="download" href="" download>Download Image</a>
+    </div>
+
+    <script>
+        function showImage(src) {
+            document.getElementById('fullImage').src = src;
+            document.getElementById('downloadLink').href = src;
+            document.getElementById('fullImageContainer').style.display = 'flex';
+        }
+
+        function closeImage() {
+            document.getElementById('fullImageContainer').style.display = 'none';
+            document.getElementById('fullImage').src = '';
+        }
+    </script>
+</body>
+</html>
