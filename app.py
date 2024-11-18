@@ -4,7 +4,7 @@ import os
 app = Flask(__name__)
 app.config['PORTFOLIO_FOLDER'] = 'static/portfolio'
 
-# Assurez-vous que le dossier portfolio existe et contient vos images
+
 os.makedirs(app.config['PORTFOLIO_FOLDER'], exist_ok=True)
 
 @app.route('/')

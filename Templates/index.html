@@ -86,7 +86,10 @@
     </style>
 </head>
 <body>
-    <h1>My Portfolio</h1>
+    <h1 style="text-align: center; font-size: 1.5rem; font-style: italic; color: #2c3e50; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);">
+        Plonger au cœur de la nature, un cliché à la fois.
+    </h1>
+    
     <div class="gallery">
         {% for image in images %}
             <img src="{{ url_for('portfolio_image', filename=image) }}" alt="Portfolio Image" onclick="showImage('{{ url_for('portfolio_image', filename=image) }}')">
