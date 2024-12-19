@@ -9,8 +9,9 @@ TXT_FOLDER = 'files_server'
 os.makedirs(TXT_FOLDER, exist_ok=True)  # Ensure the folder exists
 
 
-DEFAULT_FILE = 'default.txt'        # Name of the default file to serve when a file is not found
-ORIGIN_SERVER = 'http://201.8.8.1'  # central server from which to retrieve the images that are not locally available
+DEFAULT_FILE = 'default.txt'            # Name of the default file to serve when a file is not found
+ORIGIN_SERVERS = ['http://201.8.8.1',
+                  'http://202.8.8.1']   # central server from which to retrieve the images that are not locally available
 MAX_FILES = 3
 
 file_request_count = {}
@@ -34,38 +35,32 @@ def serve_file(filename):
         return send_file(file_path)
     
     else:                                   # if not existant, fetch from origin
-        print(f"File {filename} not on this server. Getting it from the origin server.")
+        print(f"File {filename} not on this server. Getting it from origin server.")
         
         while len(os.listdir(TXT_FOLDER)) >= MAX_FILES:
             delete_least_requested_file()
 
-        file_url = f"{ORIGIN_SERVER}/{filename}"
+        for origin_server in ORIGIN_SERVERS:
+            file_url = f"{origin_server}/{filename}"
 
-        try:
-            response = requests.get(file_url)
+            try:
+                response = requests.get(file_url)
 
-            if response.status_code == 200:             # file exists on origin server
-                with open(file_path, 'wb') as f:
-                    f.write(response.content)
-                return send_file(file_path)
+                if response.status_code == 200:             # file exists on origin server
+                    with open(file_path, 'wb') as f:
+                        f.write(response.content)
+                    return send_file(file_path)
             
-            elif response.status_code == 404:           # file does not exist on origin server
-                print(f"File {filename} not found on origin server. Returning local default file")
-                if os.path.exists(default_path):
-                    return send_file(default_path)
-                else:
-                    abort(404, description="Default file not found on this server.")
-            else:                                       # other errors from origin server
-                print(f"Error fetching {filename} from origin server. Status code: {response.status_code}")
-                abort(response.status_code, description=f"Error from origin server: {response.reason}")
+            except requests.exceptions.RequestException as e:
+                print(f"Error fetching {filename} from origin server: {e}")
 
-
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching {filename} from origin server: {e}")
-            if os.path.exists(default_path):
-                return send_file(default_path)
-            else: 
-                abort(404, description="Default file not found.")
+        # if the program reaches this code, it was impossible to obtain the requested file -> return default file
+        if os.path.exists(default_path):
+            print("Requested file not found on origin server. Returning local default file.")
+            return send_file(default_path)
+        else:
+            abort(404, description="Default file not found on this server.")
+                
 
 
 def delete_least_requested_file():
