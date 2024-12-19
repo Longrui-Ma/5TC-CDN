@@ -23,7 +23,7 @@ def serve_file(filename):
     if os.path.exists(file_path):
         return send_file(file_path)
 
-    # 2. Vérifier dans le cache
+    # 2. Si le fichier existe pas en local, vérifier dans le cache
     if filename in cache:
         update_cache(filename)  # Mettre à jour l'ordre LRU
         return Response(cache[filename], mimetype='image/jpeg')
@@ -39,7 +39,7 @@ def serve_file(filename):
 
         return send_file(
         io.BytesIO(image), 
-        mimetype='image/jpeg'  # Assurez-vous de définir le bon type MIME en fonction de l'image
+        mimetype='image/jpeg' 
         )
 
     # 4. Si l'image est introuvable, renvoyer une erreur 404
@@ -60,7 +60,7 @@ def fetch_from_primary_server(filename):
 
 def update_cache(filename):
     if filename in cache:
-        # Déplacer l'élément à la fin de l'OrderedDict pour le marquer comme le plus récemment utilisé
+        # marquer comme le plus récemment utilisé
         cache.move_to_end(filename)
 
 @app.route('/cache', methods=['GET'])
