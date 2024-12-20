@@ -14,3 +14,7 @@ Ce projet a pour but de créer un serveur de distribution de contenu (CDN) pour 
 - Stratégie de gestion des images : Lorsqu'une image est demandée, elle est d'abord recherchée localement. Si elle n'est pas trouvée, une requête est envoyée au serveur principal pour récupérer l'image, puis elle est ajoutée au cache et envoyée au client.
 - Contrôle du cache : Il est possible de consulter l'état du cache via une route dédiée qui retourne les fichiers présents dans le cache, leur nombre, ainsi que la limite du cache.
 - Optimisation de la performance : Le système minimise les temps de réponse pour les clients en servant les images depuis le cache, réduisant ainsi la charge sur le serveur principal.
+
+L'architecture du projet sur GNS3 se trouve dans le dossier CDN-BGP-GNS3.
+Le dossier my-portofolio est un site web qu'on avait implementé au debut du projet pour le mettre dans nos serveurs, finalement on ne l'a pas utilisé.
+Dans le dossier codes-serveur se trouve le fichier origin-serveur.py qui est le code pour notre serveur d'origine, le fichier serveur-FIFO qui est le code pour les edge serveurs avec comme stratégie de caching FIFO, et le fichier serveur-LRU avec une stratégie de caching LRU. La stratégie LRU a été maintenue.
