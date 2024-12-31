@@ -3,17 +3,52 @@ import os
 from collections import OrderedDict
 import requests
 import io
+import requests
+
 
 app = Flask(__name__)
-
 # Les images se trouvant en local
 LOCAL_FOLDER = './images'
-
 # Limite du cache
 CACHE_LIMIT = 4
-
 # Strategie de caching : LRU
 cache = OrderedDict()
+
+
+class DHTNode:
+    def __init__(self, server_ip):
+        self.server_ip = server_ip
+        self.hash_ring = {}
+
+    def add_server(self, server_ip):
+        """Distribute hash range for each CDN node"""
+        hash_value = hash(server_ip)
+        self.hash_ring[hash_value] = server_ip
+
+    def get_server(self, key):
+        """Get CDN server from hash ring"""
+        hash_value = hash(key)
+        sorted_hashes = sorted(self.hash_ring.keys())
+        for h in sorted_hashes:
+            if hash_value <= h:
+                return self.hash_ring[h]
+        return self.hash_ring[sorted_hashes[0]]
+
+
+def sync_to_neighbors(hash_data, neighbors):
+    for neighbor_url in neighbors:
+        response = requests.post(f"{neighbor_url}/add_hash", json=hash_data)
+        if response.status_code != 200:
+            print(f"Failed to sync with {neighbor_url}")
+
+
+def add_hash_to_ring(dht_node, hash_data):
+    image_hash = hash_data["hash"]
+    image_path = hash_data["path"]
+    # add hash to local ring
+    dht_node.add_to_ring(image_hash, image_path)
+    return "Hash added"
+
 
 @app.route('/<filename>', methods=['GET'])
 def serve_file(filename):
@@ -73,6 +108,22 @@ def cache_status():
         "cache_count": len(cache),
         "cache_limit": CACHE_LIMIT
     })
+
+# TODO: open another port for DHT-like ring
+# app = Flask(__name__)
+# dht_storage = {}
+#
+# @app.route("/add_hash", methods=["POST"])
+# def add_hash():
+#     data = request.json
+#     image_hash = data["hash"]
+#     image_path = data["path"]
+#     dht_storage[image_hash] = image_path
+#     return "Hash added to DHT", 200
+#
+# if __name__ == "__main__":
+#     app.run(port=8080)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
